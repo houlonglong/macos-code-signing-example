@@ -29,11 +29,11 @@ jobs:
           git tag $TAG_NAME
           git push origin $TAG_NAME
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.TONKEN }}
 
       - name: Upload to GitHub Releases
         uses: softprops/action-gh-release@v1
         with:
           files: release/build/mac-universal-x64-temp/ElectronReact.dmg  # 请确认正确的文件路径
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.TONKEN }}
