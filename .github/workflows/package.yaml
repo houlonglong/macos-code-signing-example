@@ -29,7 +29,13 @@ jobs:
 
       - name: Build and Package
         run: |
-          npm run package
+          npm run package:publish
+
+      - name: Create Git tag
+        run: |
+          # 创建一个新的标签，使用 Git 提交 SHA 或者自定义版本号
+          git tag v${{ github.run_number }}
+          git push origin v${{ github.run_number }}
 
       - name: Upload to GitHub Releases
         uses: softprops/action-gh-release@v1
