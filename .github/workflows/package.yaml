@@ -7,8 +7,28 @@ on:
       - main
 
 jobs:
+  release:
+    name: Release pushed tag
+    runs-on: ubuntu-22.04
+    steps:
+        - name: Create release
+          env:
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              tag: ${{ github.ref_name }}
+          run: |
+              if gh release view "$tag" --repo="$GITHUB_REPOSITORY" &> /dev/null; then
+                echo "Release $tag already exists."
+              else
+                gh release create "$tag" \
+                    --repo="$GITHUB_REPOSITORY" \
+                    --title="${tag}" \
+                    --draft \
+                    --generate-notes
+                echo "Release $tag created."
+              fi
   package-mac:
     runs-on: macos-latest
+    needs: release
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -28,27 +48,31 @@ jobs:
             echo "Build file not found!"
             exit 1
           fi
-
-      - name: Create a new tag
-        id: create_tag
+      - name: Check if build file exists
         run: |
-          COMMIT_HASH=$(git rev-parse --short HEAD)
-          TAG_NAME="v1.0.0-${COMMIT_HASH}"
-          echo "Creating tag: $TAG_NAME"
-          
-          # Set Git config
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          
-          # Create and push tag
-          git tag $TAG_NAME
-          git push origin $TAG_NAME
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          gh release upload ${{ github.ref_name }} "release/build/mac-universal-x64-temp/ElectronReact.dmg"
 
-      - name: Upload to GitHub Releases
-        uses: softprops/action-gh-release@v1
-        with:
-          files: release/build/mac-universal-x64-temp/ElectronReact.dmg
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      # - name: Create a new tag
+      #   id: create_tag
+      #   run: |
+      #     COMMIT_HASH=$(git rev-parse --short HEAD)
+      #     TAG_NAME="v1.0.0-${COMMIT_HASH}"
+      #     echo "Creating tag: $TAG_NAME"
+          
+      #     # Set Git config
+      #     git config user.name "GitHub Actions"
+      #     git config user.email "actions@github.com"
+          
+      #     # Create and push tag
+      #     git tag $TAG_NAME
+      #     git push origin $TAG_NAME
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      # - name: Upload to GitHub Releases
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     files: release/build/mac-universal-x64-temp/ElectronReact.dmg
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
