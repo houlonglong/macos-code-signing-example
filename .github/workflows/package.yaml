@@ -29,11 +29,11 @@ jobs:
 
       - name: Build and Package
         run: |
-          npm run package:publish
+          npm run package
 
       - name: Upload to GitHub Releases
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: release/build/mac-universal-x64-temp/your-app-file.zip
+          files: release/build/mac-universal-x64-temp/ElectronReact.dmg
