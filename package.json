@@ -250,8 +250,12 @@
     },
     "extraResources": [
       "./assets/**"
-    ]
-   
+    ],
+    "publish": {
+      "provider": "github",
+      "owner": "31363537@qq.com",
+      "repo": "macos-code-signing-example"
+    }
   },
   "collective": {
     "url": "https://opencollective.com/electron-react-boilerplate-594"
