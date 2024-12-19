@@ -1,5 +1,6 @@
 name: Package and Upload
-
+permissions:
+  contents: write
 on:
   push:
     branches:
@@ -18,14 +19,25 @@ jobs:
       - name: Build app
         run: npm run package
 
+      - name: Check if build file exists
+        run: |
+          if [ ! -f release/build/mac-universal-x64-temp/ElectronReact.dmg ]; then
+            echo "Build file not found!"
+            exit 1
+          fi
+
       - name: Create a new tag
         id: create_tag
         run: |
-          # 获取最新的提交 hash
           COMMIT_HASH=$(git rev-parse --short HEAD)
-          # 创建新的标签，格式为 v1.0.0-commitHash
           TAG_NAME="v1.0.0-${COMMIT_HASH}"
           echo "Creating tag: $TAG_NAME"
+          
+          # Set Git config
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          # Create and push tag
           git tag $TAG_NAME
           git push origin $TAG_NAME
         env:
@@ -34,6 +46,6 @@ jobs:
       - name: Upload to GitHub Releases
         uses: softprops/action-gh-release@v1
         with:
-          files: release/build/mac-universal-x64-temp/ElectronReact.dmg  # 请确认正确的文件路径
+          files: release/build/mac-universal-x64-temp/ElectronReact.dmg
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
