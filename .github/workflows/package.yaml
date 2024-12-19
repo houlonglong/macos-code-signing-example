@@ -1,84 +1,37 @@
 name: Package
 
-on: [push, pull_request]
+on: 
+  push:
+    branches:
+      - main
 
 jobs:
   package-mac:
-    # Notarization is taking too long, exit
     timeout-minutes: 30
     runs-on: macos-latest
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v3
 
-      - name: Install Node.js and NPM
+      - name: Install Node.js and pnpm
         uses: actions/setup-node@v3
         with:
           node-version: 20
-          cache: npm
-      - name: npm install
+          cache: pnpm
+
+      - name: Install dependencies with pnpm
         run: |
-          npm install
+          npm install -g pnpm
+          pnpm install
 
-      - name: Package and Upload to S3
-        env:
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          CSC_LINK: ${{ secrets.CSC_LINK }}
-          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}        
+      - name: Package the app
         run: |
-          npm run package:publish
+          pnpm run package:publish
 
-
-  package-windows:
-    timeout-minutes: 30
-    runs-on: windows-latest
-
-    steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v3
-
-      - name: Install Node.js and NPM
-        uses: actions/setup-node@v3
+      - name: Create GitHub Release and upload assets
+        uses: softprops/action-gh-release@v1
         with:
-          node-version: 20
-          cache: npm
-
-      - name: npm install
-        run: |
-          npm install
-
-      - name: Package and Upload to S3
-        run: |
-          npm run package:publish
+          files: |
+            dist/**/*    # 修改为打包文件的目录和模式，确保路径正确
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}        
-
-  package-linux:
-    timeout-minutes: 30
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v3
-
-      - name: Install Node.js and NPM
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
-          cache: npm
-
-      - name: npm install
-        run: |
-          npm install
-
-      - name: Package and Upload to S3
-        run: |
-          npm run package:publish
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}               
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 使用 GitHub 提供的 token 上传到 GitHub Releases
