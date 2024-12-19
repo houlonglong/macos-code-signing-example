@@ -18,7 +18,10 @@ jobs:
 
       - name: Build app
         run: npm run package
-
+      
+      - name: Check codesigning
+        run: security find-identity -p codesigning -v
+        
       - name: Check if build file exists
         run: |
           if [ ! -f release/build/mac-universal-x64-temp/ElectronReact.dmg ]; then
