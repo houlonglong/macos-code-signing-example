@@ -250,11 +250,8 @@
     },
     "extraResources": [
       "./assets/**"
-    ],
-    "publish": {
-      "provider": "s3",
-      "bucket": "YOUR_S3_BUCKET_NAME"
-    }
+    ]
+   
   },
   "collective": {
     "url": "https://opencollective.com/electron-react-boilerplate-594"
